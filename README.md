@@ -2,7 +2,7 @@
 
 This is the result to complete the Exercise Tracker project. 
 
-Instructions for building your project can be found at 
+Instructions for building the project can be found at 
 https://www.freecodecamp.org/learn/apis-and-microservices/apis-and-microservices-projects/exercise-tracker
 
 ###  Some of additional features :

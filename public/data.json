@@ -1,22 +1,26 @@
 [
   {
     "username": "john",
-    "_id": "4d1a9de8dd2c4e9baf49188a",
-    "log": []
-  },
-  {
-    "username": "jeniffer",
-    "_id": "e114a9443e734dbfb31f7c47",
-    "log": []
-  },
-  {
-    "username": "jeremmy",
-    "_id": "3ff31ba21d3f441d8717d7c4",
+    "_id": "18044ed0563f435d933fe314",
+    "count": 0,
     "log": []
   },
   {
     "username": "jessica",
-    "_id": "0f4f5c41eae74cf8a62584d3",
+    "_id": "e0de1da3d1b141c49656df84",
+    "count": 0,
+    "log": []
+  },
+  {
+    "username": "jeremmy",
+    "_id": "7a5669f9bc9b47b595125a3e",
+    "count": 0,
+    "log": []
+  },
+  {
+    "username": "jenny",
+    "_id": "4ab2fc516e81401cb4bb4027",
+    "count": 0,
     "log": []
   }
 ]

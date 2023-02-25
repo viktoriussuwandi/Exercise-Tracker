@@ -32,7 +32,8 @@ function dataManagement(action, input) {
     //check if file is empty
     if (file.length == 0) {
       //add new data to json file
-      input.log = []; fs.writeFileSync(filePath, JSON.stringify([input], null, 2));
+      input.count = 0; input.log = []; 
+      fs.writeFileSync(filePath, JSON.stringify([input], null, 2));
     } else {
       let Alldata = JSON.parse(file.toString());
       
@@ -41,13 +42,13 @@ function dataManagement(action, input) {
       let check_input = id_Exist.includes(input._id);
       
       //append input to data.json file
-      //add log to existing user
+      //update count, and log to existing user
       if (check_input == false && input.index != undefined) {
         console.log(input);
       }
       else if (check_input == false && input.index == undefined) {
         //add input element to existing data json object
-        input.log = []; Alldata.push( input );
+        input.count = 0; input.log = []; Alldata.push( input );
         fs.writeFileSync(filePath, JSON.stringify(Alldata, null, 2));
       }
     }
@@ -114,7 +115,7 @@ app.post('/api/users/:_id/exercises',
       else {
         let id_Exist   = Alldata.map(d => d.id);
         let found_user = Alldata[ id_Exist.indexOf(id) ];
-        res.json({input : userInput, data : data});
+        res.json({input : found_user, data : Alldata});
       }
     }
     
