@@ -1,8 +1,12 @@
 # Exercise Tracker
 
-This is the boilerplate for the Exercise Tracker project. Instructions for building your project can be found at https://www.freecodecamp.org/learn/apis-and-microservices/apis-and-microservices-projects/exercise-tracker
+This is the result to complete the Exercise Tracker project. 
 
-##  Some of additional features :
-### -Avoid duplicate username
-### -Avoid duplicate id
-### -Using local file to save user input
+Instructions for building your project can be found at 
+https://www.freecodecamp.org/learn/apis-and-microservices/apis-and-microservices-projects/exercise-tracker
+
+###  Some of additional features :
+#### -Avoid duplicate user_id using recursive function
+#### -Using local file to save user input
+#### -Using id generator to generate user id
+#### -Using express validator to validate user input
