@@ -48,7 +48,7 @@ function dataManagement(action, input) {
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
       }
     }
-  }   
+  }
   //screnario for load the data
   else if (action == 'load data' && input == null) {
     if (file.length == 0) { return; }
@@ -83,6 +83,18 @@ app.get('/api/users', (req,res) => {
     res.json(data);
   }
 });
+
+app.post('/api/users/:_id/exercises', 
+  [
+    check('uid'),
+    check('desc'),
+    check('dur'),
+    check('date')
+  ], 
+  (req,res) => {
+    
+});
+
 /*=========================================================================================*/
 
 const listener = app.listen(process.env.PORT || 3000, () => {
