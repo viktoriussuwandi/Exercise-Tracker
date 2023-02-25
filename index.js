@@ -29,11 +29,10 @@ function dataManagement(action, input) {
 
   //screnario for save input into data
   if (action == 'save data' && input != null) {
-    let user_input = { username : input.username, _id : input._id, log : [] }
-      //check if file is empty
+    //check if file is empty
     if (file.length == 0) {
       //add new data to json file
-      fs.writeFileSync(filePath, JSON.stringify([user_input], null, 2));
+      input.log = []; fs.writeFileSync(filePath, JSON.stringify([input], null, 2));
     } else {
       let Alldata = JSON.parse(file.toString());
       
@@ -43,17 +42,17 @@ function dataManagement(action, input) {
       
       //append input to data.json file
       //add log to existing user
-      if (check_input == false && input.log != undefined) {
-        console.log(user_input);
+      if (check_input == false && input.index != undefined) {
+        console.log(input);
       }
-      else if (check_input == false && input.log == undefined) {
+      else if (check_input == false && input.index == undefined) {
         //add input element to existing data json object
-        Alldata.push( user_input );
+        input.log = []; Alldata.push( input );
         fs.writeFileSync(filePath, JSON.stringify(Alldata, null, 2));
       }
     }
   }
-  //screnario for load All data (only id and username)
+  //screnario for load All data
   else if (action == 'load data' && input == null) {
     if (file.length == 0) { return; }
     else {
@@ -65,15 +64,17 @@ function dataManagement(action, input) {
 
 function gen_id() {
   let Alldata  = dataManagement("load data");
-  let id_Exist = Alldata.map(d => d.id);
   let id       = uuid.v4().replace(/-/g, "").slice(0,24);
-  
+  if (Alldata == undefined) { return id; }
+  else {
+    let id_Exist = Alldata.map(d => d.id);
+    let check_id = id_Exist.includes(id);
+    if (check_id == false) { return id; } else { gen_id(); }
+  }
 }
 
 app.post('/api/users',
-  [
-    check('username', 'username: Path `username` is required').isLength({ min: 1 })
-  ],
+  [ check('username', 'username: Path `username` is required').isLength({ min: 1 }) ],
   (req,res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) { res.json(errors) }
@@ -81,7 +82,7 @@ app.post('/api/users',
       username = req.body.username; id = gen_id();
       user = { username : username, _id : id }
       dataManagement("save data", user)
-      res.json(user);
+      res.json({ username : username, _id : id });
     }
   }
 );
@@ -108,12 +109,12 @@ app.post('/api/users/:_id/exercises',
     const errors = validationResult(req);
     if (!errors.isEmpty()) { res.json(errors) }
     else {
-      data = dataManagement('load data');
-      if (data === undefined) { return; }
+      Alldata = dataManagement('load data');
+      if (Alldata === undefined) { return; }
       else {
-        index_input = data.indexOf(id);
-        console.log(index_input);
-        res.json({input : userInput, data : data});  
+        let id_Exist   = Alldata.map(d => d.id);
+        let found_user = Alldata[ id_Exist.indexOf(id) ];
+        res.json({input : userInput, data : data});
       }
     }
     
