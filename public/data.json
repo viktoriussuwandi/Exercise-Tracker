@@ -1,13 +1,29 @@
 [
   {
     "username": "john",
-    "_id": "1737adc23f724e27a7cf780f",
-    "count": 0,
-    "log": []
+    "_id": "2f5c7c49539745a3a83a7014",
+    "count": 3,
+    "log": [
+      {
+        "description": "aaa",
+        "duration": "15",
+        "date": "Sat Jan 01 2022"
+      },
+      {
+        "description": "bbb",
+        "duration": "30",
+        "date": "Sun Jan 02 2022"
+      },
+      {
+        "description": "ccc",
+        "duration": "45",
+        "date": "Sun Feb 26 2023"
+      }
+    ]
   },
   {
     "username": "jessica",
-    "_id": "dd7534324dd344c0a8b66ff2",
+    "_id": "59c5bc83e29a4116a6087457",
     "count": 0,
     "log": []
   }

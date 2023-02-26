@@ -54,7 +54,9 @@ function dataManagement(action, input) {
       //if user id already exist -> update count, and log to existing user id
       else if ( check_id == true ) {
         console.log({action : 'update existing user'});
-        return;
+        user_index = id_Exist.indexOf(input._id);
+        Alldata.splice(user_index,1, input);
+        return fs.writeFileSync(filePath, JSON.stringify( Alldata, null, 2 ) );
       }
       else { return console.log( {action : 'no action'} ); }
       
@@ -145,7 +147,8 @@ app.post('/api/users/:_id/exercises',
       else {
         //Validate input date
         let isValidDate = Date.parse(date);
-        if(isNaN(isValidDate)) { date = new Date().toDateString() } else { date = new Date(date).toDateString(); }
+        if(isNaN(isValidDate)) { date = new Date().toDateString() } 
+        else { date = new Date(date).toDateString(); }
 
         //Update user log
         let username     = found_user.username;
@@ -160,7 +163,10 @@ app.post('/api/users/:_id/exercises',
         
         user = { username : username, _id : _id, count : count, log : log };
         dataManagement('save data', user);
-        return res.json ({_id : _id, username : username, date : date, duration: parseInt(dur), description : desc});
+        return res.json ({
+           _id : _id, username : username, date : date, 
+           duration: parseInt(dur), description : desc
+        });
       }
     }
 });
