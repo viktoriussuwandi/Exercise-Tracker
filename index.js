@@ -46,19 +46,22 @@ function dataManagement(action, input) {
       
       //if user id not exist -> add new user to data.json
       if ( check_id == false ) {
-        console.log({action : 'input new user'});
+        // console.log({action : 'input new user'});
         Alldata.push( input );
         return fs.writeFileSync(filePath, JSON.stringify( Alldata, null, 2 ) );
       }
       
       //if user id already exist -> update count, and log to existing user id
       else if ( check_id == true ) {
-        console.log({action : 'update existing user'});
+        // console.log({action : 'update existing user'});
         user_index = id_Exist.indexOf(input._id);
         Alldata.splice(user_index,1, input);
         return fs.writeFileSync(filePath, JSON.stringify( Alldata, null, 2 ) );
       }
-      else { return console.log( {action : 'no action'} ); }
+      else {
+        // console.log( {action : 'no action'} );
+        return;
+      }
       
     } else { return; }
   }
@@ -143,7 +146,7 @@ app.post('/api/users/:_id/exercises',
       let id_Exist    = Alldata.map(d => d._id);
       let found_user  = Alldata[ id_Exist.indexOf( id ) ];
       
-      if (found_user == undefined) { res.json({user_id : 'Invalid user id'}); }
+      if (found_user == undefined) { return res.json({user_id : 'Invalid user id'}); }
       else {
         //Validate input date
         let isValidDate = Date.parse(date);
@@ -159,7 +162,7 @@ app.post('/api/users/:_id/exercises',
 
         let log_Exist    = found_user.log;
         let log_input    = {description : desc, duration : dur, date : date};
-        let log          = found_user.log.concat(log_input);
+        let log          = log_Exist.concat(log_input);
         
         user = { username : username, _id : _id, count : count, log : log };
         dataManagement('save data', user);
@@ -171,6 +174,38 @@ app.post('/api/users/:_id/exercises',
     }
 });
 
+app.get('/api/users/:_id/logs', (req,res) => {
+  Alldata = dataManagement('load data');
+  let id    = req.params._id;
+
+  if (Alldata === undefined) { return res.json({data : 'no data'}); }
+  else {
+    //check if id exist
+    let id_Exist     = Alldata.map(d => d._id);
+    let found_user   = Alldata[ id_Exist.indexOf( id ) ];
+    
+    if (found_user == undefined) { return res.json({user_id : 'Invalid user id'}); }
+    else {
+      let _id        = found_user._id;
+      let username   = found_user.username;
+      let count      = parseInt(found_user.count);
+
+      let log_Exist  = found_user.log;
+      let log_format = log_Exist.map( 
+        (l) => {
+          return {
+          description : l.description,
+          duration    : parseInt(l.duration),
+          date        : l.date
+        }}
+      );
+
+      user_data = { _id : _id, username : username, count : count, log : log_format };
+      return res.json(user_data);
+    }
+  }
+  
+});
 /*=========================================================================================*/
 
 const listener = app.listen(process.env.PORT || 3000, () => {
