@@ -242,6 +242,3 @@ app.get('/api/users/:_id/logs', (req,res) => {
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
-
-// log_fin = log_format.filter((d) => { return Date.parse(d.date) > Date.parse(from); } );
-// https://github.com/freeCodeCamp/freeCodeCamp/issues/44806
