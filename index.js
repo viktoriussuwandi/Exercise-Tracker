@@ -27,29 +27,30 @@ function dataManagement(action, input) {
   if (!fs.existsSync(filePath)) { fs.closeSync(fs.openSync(filePath, 'w')); }
   let file = fs.readFileSync(filePath);
 
-  //screnario for save input into data
+  //screnario for save input into data -> append input to data.json file
   if (action == 'save data' && input != null) {
+    
     //check if file is empty
     if (file.length == 0) {
-      //add new data to json file
-      input.count = 0; input.log = []; 
+      //add new user to data.json
       fs.writeFileSync(filePath, JSON.stringify([input], null, 2));
-    } else {
+    } 
+    //if file not empty
+    else {
       let Alldata = JSON.parse(file.toString());
       
-      //check if input.id already exist
+      //check existing user id (check existing username already done on genererate user id for new user)
       let id_Exist    = Alldata.map(d => d.id);
-      let check_input = id_Exist.includes(input._id);
+      let check_id    = id_Exist.includes(input._id);
       
-      //append input to data.json file
-      //update count, and log to existing user
-      if (check_input == false && input.index != undefined) {
-        console.log(input);
+      //if user id not exist -> add new user to data.json
+      if (check_id == false) {
+        Alldata.push( input ); fs.writeFileSync(filePath, JSON.stringify(Alldata, null, 2));
       }
-      else if (check_input == false && input.index == undefined) {
-        //add input element to existing data json object
-        input.count = 0; input.log = []; Alldata.push( input );
-        fs.writeFileSync(filePath, JSON.stringify(Alldata, null, 2));
+      //if user id already exist -> update count, and log to existing user id
+      else if (check_id == true) {
+        console.log({action : 'update existing user', input});
+        
       }
     }
   }
@@ -63,14 +64,27 @@ function dataManagement(action, input) {
   }
 }
 
-function gen_id() {
+//Additional function : Update log of specific user id
+function update_log(index, new_log) {
+  console.log('Update existing user log');
+}
+
+//Additional function : generate user id
+function gen_id(username) {
   let Alldata  = dataManagement("load data");
   let id       = uuid.v4().replace(/-/g, "").slice(0,24);
   if (Alldata == undefined) { return id; }
   else {
-    let id_Exist = Alldata.map(d => d.id);
-    let check_id = id_Exist.includes(id);
-    if (check_id == false) { return id; } else { gen_id(); }
+    //check existing user id and username
+    let id_Exist    = Alldata.map(d => d.id);
+    let name_Exist  = Alldata.map(d => d.username);
+    let check_id    = id_Exist.includes(id); let check_username = name_Exist.includes(username);
+    let check_input = check_id && check_username
+    
+    if      (check_id    == true  && check_username == false) { gen_id(username); }
+    else if (check_id    == false && check_username == true)  { return; }
+    else if (check_input == false) { return id; }
+    else    { return; }
   }
 }
 
@@ -80,10 +94,14 @@ app.post('/api/users',
     const errors = validationResult(req);
     if (!errors.isEmpty()) { res.json(errors) }
     else {
-      username = req.body.username; id = gen_id();
-      user = { username : username, _id : id }
-      dataManagement("save data", user)
-      res.json({ username : username, _id : id });
+      username = req.body.username; id = gen_id(username);
+      if ( id === undefined ) { 
+        res.json({ action : 'input failed, Username already Exist'}); 
+      } else {
+        user = { username : username, _id : id, count : 0, log : [] };
+        dataManagement("save data", user);
+        res.json({ username : username, _id : id });
+      }
     }
   }
 );
