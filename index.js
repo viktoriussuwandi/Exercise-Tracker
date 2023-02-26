@@ -34,7 +34,7 @@ function dataManagement(action, input) {
     if (file.length == 0) {
       //add new user to data.json
       fs.writeFileSync(filePath, JSON.stringify([input], null, 2));
-    } 
+    }
     //if file not empty
     else {
       let Alldata = JSON.parse(file.toString());
@@ -44,13 +44,12 @@ function dataManagement(action, input) {
       let check_id    = id_Exist.includes(input._id);
       
       //if user id not exist -> add new user to data.json
-      if (check_id == false) {
-        Alldata.push( input ); fs.writeFileSync(filePath, JSON.stringify(Alldata, null, 2));
-      }
+      if (check_id == false) { Alldata.push( input ); fs.writeFileSync(filePath, JSON.stringify(Alldata, null, 2)); }
+        
       //if user id already exist -> update count, and log to existing user id
       else if (check_id == true) {
-        console.log({action : 'update existing user', input});
         
+        console.log({action : 'update existing user', input});
       }
     }
   }
@@ -64,10 +63,6 @@ function dataManagement(action, input) {
   }
 }
 
-//Additional function : Update log of specific user id
-function update_log(index, new_log) {
-  console.log('Update existing user log');
-}
 
 //Additional function : generate user id
 function gen_id(username) {
@@ -116,27 +111,43 @@ app.get('/api/users', (req,res) => {
   }
 });
 
+
 app.post('/api/users/:_id/exercises',
   [
     check('description','desc: Path `description` is required').isLength({ min: 1 }),
-    check('duration','duration: Path `duration` is required').isLength({ min: 1 }),
-    check('date','date: Path `date` is required').isLength({ min: 1 })
+    check('duration','duration: Path `duration` is required with valid number')
+      .matches(/^[0-9]+$/)
+      .isLength({ min: 1 }),
   ],
   (req,res) => {
     let id    = req.params._id;
-    let desc  = req.body.description; let dur = req.body.duration; let date = req.body.date;
+    let desc  = req.body.description;
+    let dur   = req.body.duration;
+    let date  = req.body.date;
+    
+    Alldata = dataManagement('load data');
     const errors = validationResult(req);
+    
     if (!errors.isEmpty()) { res.json(errors) }
+    else if (Alldata === undefined) { return; }
     else {
-      Alldata = dataManagement('load data');
-      if (Alldata === undefined) { return; }
+      //find input user id on existing data -> if user is exist then update user's log
+      let id_Exist    = Alldata.map(d => d._id);
+      let found_user  = Alldata[ id_Exist.indexOf( id ) ];
+      
+      if (found_user == undefined) { res.json({user_id : 'Invalid user id'}); }
       else {
-        let id_Exist   = Alldata.map(d => d.id);
-        let found_user = Alldata[ id_Exist.indexOf(id) ];
-        res.json({input : found_user, data : Alldata});
+        //Validate input date
+        let isValidDate = Date.parse(date);
+        if(isNaN(isValidDate)) { date = new Date() } else { date = new Date(date) }
+
+        //Update user log
+        log_input   = {"description": desc, "duration": dur, "date": date},
+        log_Exist   = JSON.parse(found_user.log).push(log_input);
+        count_Exist = found_user.count+=1;
+        res.json   ({count : count_Exist, log : log_Exist});
       }
     }
-    
 });
 
 /*=========================================================================================*/
@@ -144,3 +155,7 @@ app.post('/api/users/:_id/exercises',
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
+
+// Date format :
+// let dateFormat  = { weekday:"long", year:"numeric", month:"short", day:"numeric"}
+// date = new Date().toLocaleDateString('en-us', dateFormat);
