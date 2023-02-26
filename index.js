@@ -211,3 +211,5 @@ app.get('/api/users/:_id/logs', (req,res) => {
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
+
+// https://github.com/freeCodeCamp/freeCodeCamp/issues/44806
