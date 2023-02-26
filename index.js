@@ -12,6 +12,7 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 app.use(cors())
 app.use(express.static('public'))
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
@@ -30,28 +31,34 @@ function dataManagement(action, input) {
   //screnario for save input into data -> append input to data.json file
   if (action == 'save data' && input != null) {
     
-    //check if file is empty
+    //if file is empty
     if (file.length == 0) {
       //add new user to data.json
-      fs.writeFileSync(filePath, JSON.stringify([input], null, 2));
+      return fs.writeFileSync(filePath, JSON.stringify([input], null, 2));
     }
     //if file not empty
-    else {
-      let Alldata = JSON.parse(file.toString());
-      
+    else if (file.length > 0) {
+      let Alldata    = JSON.parse(file.toString());
+      let count_data = Alldata.length;
+
       //check existing user id (check existing username already done on genererate user id for new user)
-      let id_Exist    = Alldata.map(d => d.id);
-      let check_id    = id_Exist.includes(input._id);
+      let id_Exist = Alldata.map(d => d._id); let check_id = id_Exist.includes(input._id);
       
       //if user id not exist -> add new user to data.json
-      if (check_id == false) { Alldata.push( input ); fs.writeFileSync(filePath, JSON.stringify(Alldata, null, 2)); }
-        
-      //if user id already exist -> update count, and log to existing user id
-      else if (check_id == true) {
-        
-        console.log({action : 'update existing user', input});
+      if ( check_id == false ) {
+        console.log({action : 'input new user'});
+        Alldata.push( input );
+        return fs.writeFileSync(filePath, JSON.stringify( Alldata, null, 2 ) );
       }
-    }
+      
+      //if user id already exist -> update count, and log to existing user id
+      else if ( check_id == true ) {
+        console.log({action : 'update existing user'});
+        return;
+      }
+      else { return console.log( {action : 'no action'} ); }
+      
+    } else { return; }
   }
   //screnario for load All data
   else if (action == 'load data' && input == null) {
@@ -71,7 +78,7 @@ function gen_id(username) {
   if (Alldata == undefined) { return id; }
   else {
     //check existing user id and username
-    let id_Exist    = Alldata.map(d => d.id);
+    let id_Exist    = Alldata.map(d => d._id);
     let name_Exist  = Alldata.map(d => d.username);
     let check_id    = id_Exist.includes(id); let check_username = name_Exist.includes(username);
     let check_input = check_id && check_username
@@ -94,8 +101,8 @@ app.post('/api/users',
         res.json({ action : 'input failed, Username already Exist'}); 
       } else {
         user = { username : username, _id : id, count : 0, log : [] };
-        dataManagement("save data", user);
-        res.json({ username : username, _id : id });
+        dataManagement('save data', user);
+        return res.json({ username : username, _id : id });
       }
     }
   }
@@ -103,14 +110,13 @@ app.post('/api/users',
 
 app.get('/api/users', (req,res) => {
   let Alldata = dataManagement("load data");
-  if (Alldata === undefined) { res.json({data : 'no data'}); }
+  if (Alldata === undefined) { return res.json({data : 'no data'}); }
   else {
     //load All data (only id and username)
     let data = Alldata.map( (d) => { return {username : d.username, _id : d._id} } );
-    res.json(data);
+    return res.json(data);
   }
 });
-
 
 app.post('/api/users/:_id/exercises',
   [
@@ -129,7 +135,7 @@ app.post('/api/users/:_id/exercises',
     const errors = validationResult(req);
     
     if (!errors.isEmpty()) { res.json(errors) }
-    else if (Alldata === undefined) { return; }
+    else if (Alldata === undefined) { return res.json({data : 'no data'}); }
     else {
       //find input user id on existing data -> if user is exist then update user's log
       let id_Exist    = Alldata.map(d => d._id);
@@ -139,13 +145,22 @@ app.post('/api/users/:_id/exercises',
       else {
         //Validate input date
         let isValidDate = Date.parse(date);
-        if(isNaN(isValidDate)) { date = new Date() } else { date = new Date(date) }
+        if(isNaN(isValidDate)) { date = new Date().toDateString() } else { date = new Date(date).toDateString(); }
 
         //Update user log
-        log_input   = {"description": desc, "duration": dur, "date": date},
-        log_Exist   = JSON.parse(found_user.log).push(log_input);
-        count_Exist = found_user.count+=1;
-        res.json   ({count : count_Exist, log : log_Exist});
+        let username     = found_user.username;
+        let _id          = found_user._id;
+        
+        let count_Exist  = parseInt(found_user.count);
+        let count        = count_Exist += 1;
+
+        let log_Exist    = found_user.log;
+        let log_input    = {description : desc, duration : dur, date : date};
+        let log          = found_user.log.concat(log_input);
+        
+        user = { username : username, _id : _id, count : count, log : log };
+        dataManagement('save data', user);
+        return res.json ({_id : _id, username : username, date : date, duration: parseInt(dur), description : desc});
       }
     }
 });
@@ -155,7 +170,3 @@ app.post('/api/users/:_id/exercises',
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
-
-// Date format :
-// let dateFormat  = { weekday:"long", year:"numeric", month:"short", day:"numeric"}
-// date = new Date().toLocaleDateString('en-us', dateFormat);
