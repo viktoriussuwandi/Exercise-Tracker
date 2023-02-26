@@ -1,9 +1,11 @@
 # Exercise Tracker
+### Solution running on : https://replit.com/@ViktoriusSuwand/Exercise-Tracker-Project-7
 
-This is the result to complete the Exercise Tracker project. 
-
+This is the result to complete the Exercise Tracker project.
 Instructions for building the project can be found at 
 https://www.freecodecamp.org/learn/apis-and-microservices/apis-and-microservices-projects/exercise-tracker
+
+
 
 ###  Some of additional features :
 #### -Avoid duplicate username
