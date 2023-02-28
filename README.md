@@ -1,5 +1,5 @@
 # Exercise Tracker
-### Solution running on : https://replit.com/@ViktoriusSuwand/Exercise-Tracker-Project-7
+#### Solution running on : https://replit.com/@ViktoriusSuwand/Exercise-Tracker-Project-7
 
 This is the result to complete the Exercise Tracker project.
 Instructions for building the project can be found at 
